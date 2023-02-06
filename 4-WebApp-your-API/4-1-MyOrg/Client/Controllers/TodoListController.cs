@@ -4,9 +4,12 @@ using Microsoft.Identity.Web;
 using System.Threading.Tasks;
 using TodoListService.Models;
 using TodoListClient.Services;
+using Microsoft.AspNetCore.Authorization;
+using TodoListClient.Infrastructure;
 
 namespace TodoListClient.Controllers
 {
+
     public class TodoListController : Controller
     {
         private ITodoListService _todoListService;
@@ -16,6 +19,7 @@ namespace TodoListClient.Controllers
             _todoListService = todoListService;
         }
 
+        [Authorize(Roles =ApplicationRole.roleForView)]
         public async Task<ActionResult> Index()
         {
             var result = await _todoListService.GetAsync();
@@ -23,12 +27,16 @@ namespace TodoListClient.Controllers
         }
 
         // GET: TodoList/Details/5
+        [Authorize(Roles = ApplicationRole.roleForDetails)]
+
         public async Task<ActionResult> Details(int id)
         {
             return View(await _todoListService.GetAsync(id));
         }
 
         // GET: TodoList/Create
+        [Authorize(Roles = ApplicationRole.roleForCreate)]
+
         public ActionResult Create()
         {
             Todo todo = new Todo() { Owner = HttpContext.User.Identity.Name };
@@ -45,6 +53,8 @@ namespace TodoListClient.Controllers
         }
 
         // GET: TodoList/Edit/5
+        [Authorize(Roles = ApplicationRole.roleForEdit)]
+
         public async Task<ActionResult> Edit(int id)
         {
             Todo todo = await this._todoListService.GetAsync(id);
@@ -67,6 +77,9 @@ namespace TodoListClient.Controllers
         }
 
         // GET: TodoList/Delete/5
+
+        [Authorize(Roles = ApplicationRole.roleForDelete)]
+
         public async Task<ActionResult> DeleteItem(int id)
         {
             Todo todo = await this._todoListService.GetAsync(id);
@@ -78,6 +91,9 @@ namespace TodoListClient.Controllers
 
             return View(todo);
         }
+
+
+
 
         // POST: TodoList/Delete/5
         [HttpPost]

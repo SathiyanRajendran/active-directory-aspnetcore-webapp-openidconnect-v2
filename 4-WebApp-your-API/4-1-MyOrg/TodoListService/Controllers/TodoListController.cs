@@ -11,14 +11,20 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
+using TodoListService.Infrastructure;
 using TodoListService.Models;
+
+   
+
 
 namespace TodoListService.Controllers
 {
     /// <summary>
     /// This is an example of ToDo list controller that serves requests from client apps that sign-in users and as themselves (client credentials flow).
     /// </summary>
-    [Authorize]
+     [Authorize]
+    //[Authorize(Roles ="UserReaders")]
+
     [Route("api/[controller]")]
     public class TodoListController : Controller
     {
@@ -30,8 +36,8 @@ namespace TodoListService.Controllers
 
         private const string _todoListReadScope = "ToDoList.Read";
         private const string _todoListReadWriteScope = "ToDoList.ReadWrite";
-        private const string _todoListReadAllPermission = "ToDoList.Read.All";
-        private const string _todoListReadWriteAllPermission = "ToDoList.ReadWrite.All";
+        private const string _todoListReadAllPermission = "ToDoList.Read.All";//App role in azure portal
+        private const string _todoListReadWriteAllPermission = "ToDoList.ReadWrite.All";//App role in azure portal
 
         /// <summary>
         /// We store the object id of the user/app derived from the presented Access token
@@ -42,9 +48,15 @@ namespace TodoListService.Controllers
         /// The API controller that manages an instance of ToDo list
         /// </summary>
         /// <param name="contextAccessor"></param>
+        //public TodoListController()
+        //{
+        //    TodoStore.Add(1, new Todo() { Id = 1, Owner = $"{_currentPrincipalId}", Title = "Pick up groceries" });
+        //    TodoStore.Add(2, new Todo() { Id = 2, Owner = $"{_currentPrincipalId}", Title = "Finish invoice report" });
+        //}
         public TodoListController(IHttpContextAccessor contextAccessor)
         {
             _contextAccessor = contextAccessor;
+
 
             /**
              * When the Access Token belongs to a user (signing-in to a client app), the following claims should
@@ -77,6 +89,7 @@ namespace TodoListService.Controllers
 
             // We seek the details of the user/app represented by the access token presented to this API, This can be empty unless authN succeeded
             // If a user signed-in, the value will be the unique identifier of the user.
+            //_currentPrincipalId= "Sathiyan";
             _currentPrincipalId = GetCurrentClaimsPrincipal()?.GetObjectId();
 
             if (!IsAppOnlyToken() && !string.IsNullOrWhiteSpace(_currentPrincipalId))
@@ -88,6 +101,8 @@ namespace TodoListService.Controllers
                     TodoStore.Add(2, new Todo() { Id = 2, Owner = $"{_currentPrincipalId}", Title = "Finish invoice report" });
                 }
             }
+            //TodoStore.Add(1, new Todo() { Id = 1, Owner = "Sathiyan", Title = "Pick up groceries" });
+            //TodoStore.Add(2, new Todo() { Id = 2, Owner = "Rajendran", Title = "Finish invoice report" });
         }
 
         /// <summary>
@@ -130,14 +145,29 @@ namespace TodoListService.Controllers
         /// Returns todo list items in a list
         /// </summary>
         /// <returns></returns>
+
+       // [Authorize]
+
         [HttpGet()]
+
+
         [RequiredScopeOrAppPermission(
             AcceptedScope = new string[] { _todoListReadScope, _todoListReadWriteScope },
-            AcceptedAppPermission = new string[] { _todoListReadAllPermission, _todoListReadWriteAllPermission }
-            )]
+             AcceptedAppPermission = new string[] { _todoListReadAllPermission, _todoListReadWriteAllPermission })]
+
+        //[Authorize]
+        //[AuthorizeForScopes(ScopeKeySection = "TodoList:Scopes")]
+
         public IEnumerable<Todo> Get()
         {
-            if (!IsAppOnlyToken())
+
+            //List<Todo> todoList = new List<Todo>();
+            //todoList.Add(new Todo() { Id = 1, Owner = "Sathiyan", Title = "Book" });
+            //todoList.Add(new Todo() { Id = 2, Owner = "Rajendran", Title = "Novels" });
+            //return todoList;
+
+
+            if (IsAppOnlyToken())
             {
                 // this is a request for all ToDo list items of a certain user.
                 return TodoStore.Values.Where(x => x.Owner == _currentPrincipalId);
@@ -220,6 +250,7 @@ namespace TodoListService.Controllers
 
             todo.Id = nextid;
             TodoStore.Add(nextid, todo);
+           
             return Created($"/todo/{nextid}", todo);
         }
 

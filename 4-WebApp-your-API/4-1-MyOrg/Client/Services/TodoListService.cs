@@ -33,6 +33,7 @@ namespace TodoListClient.Services
         private readonly HttpClient _httpClient;
         private readonly string _TodoListBaseAddress = string.Empty;
         private readonly ITokenAcquisition _tokenAcquisition;
+        private readonly string _TodoListScope = string.Empty;
 
         public TodoListService(ITokenAcquisition tokenAcquisition, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor contextAccessor)
         {
@@ -40,6 +41,7 @@ namespace TodoListClient.Services
             _tokenAcquisition = tokenAcquisition;
             _contextAccessor = contextAccessor;
             _TodoListBaseAddress = configuration["TodoList:TodoListBaseAddress"];
+            _TodoListScope = configuration["TodoList:TodoListScopes"];
         }
 
         public async Task<Todo> AddAsync(Todo todo)
@@ -105,7 +107,7 @@ namespace TodoListClient.Services
             }
 
             return null;
-        }        
+        }
 
         public async Task<Todo> GetAsync(int id)
         {
@@ -129,7 +131,7 @@ namespace TodoListClient.Services
             //Note that these scopes can be different from what you provided in startup.cs.
             //The scopes provided here can be different or more from the ones provided in Startup.cs. Note that if they are different,
             //then the user might be prompted to consent again.
-            var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(new List<string>());
+            var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(new string[] {_TodoListScope});
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }

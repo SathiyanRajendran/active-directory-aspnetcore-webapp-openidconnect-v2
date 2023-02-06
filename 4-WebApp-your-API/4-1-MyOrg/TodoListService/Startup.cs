@@ -16,6 +16,8 @@ using System;
 using Microsoft.AspNetCore.Mvc.Filters;
 using TodoListService.Filters;
 using System.Threading.Tasks;
+using TodoListService.Infrastructure;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace TodoListService
 {
@@ -39,6 +41,10 @@ namespace TodoListService
 
             // Adds Microsoft Identity platform (AAD v2.0) support to protect this Api
             services.AddMicrosoftIdentityWebApiAuthentication(Configuration);
+           
+          
+
+           
 
 
             //// Comment the lines of code above and uncomment the following section if you would like to limit calls to this API to just a set of client apps
